@@ -167,13 +167,16 @@ class BlockController {
                 return res.status(422).json({ errors: errors.array() });
             }
             if(!this.registrationProvider.validationAddress(req.body.address)){
+                
                 return res.status(400).json({ errors: "can't register a star, address not found" });
 
             }
+            
             (async () => {
                 res.setHeader('Content-Type', 'application/json');
-
-                res.send(await db.addBlock(req.body));
+                let block = await db.addBlock(req.body);
+                this.registrationProvider.removeRegistrationRequestByAddress(req.body.address)
+                res.send(block);
             })()
         });
     }

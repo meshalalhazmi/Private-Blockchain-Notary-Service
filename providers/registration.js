@@ -9,21 +9,51 @@ class RegistrationProvider {
         // this.initializeMockData();
      }
      appendAddress(address){
-        const timestamp = new Date().getTime().toString().slice(0,-3);;
-        const validationWindow = 60 * 5;
-         
-        const message = `${address}:${timestamp}:starRegistry`
-        const registrationRequest = {"address" : address, requestTimeStamp:timestamp, message: message,validationWindow:validationWindow};
-        this.activeAddresses[address] = registrationRequest
-        setTimeout( () => {  
-              console.log("registrationRequest",registrationRequest);
-              this.removeAddress(registrationRequest)
-        }, validationWindow * 1000); 
+         if(!this.activeAddresses[address]){
+            const timestamp = new Date().getTime().toString().slice(0,-3);;
+            const validationWindow = 60 * 5;
+             
+            const message = `${address}:${timestamp}:starRegistry`
+            const registrationRequest = {"address" : address, requestTimeStamp:timestamp, message: message,validationWindow:validationWindow};
+            this.activeAddresses[address] = registrationRequest
+            setTimeout( () => {  
+                  console.log("registrationRequest",registrationRequest);
+                  this.removeAddress(registrationRequest)
+            }, validationWindow * 1000); 
+            
+            return registrationRequest
+         } else{
+            return this.getRegistrationRequest(this.activeAddresses[address]) 
+         }
         
-        return registrationRequest
      } 
+     getRegistrationRequest(registrationRequest){
+         
+             let data = { "status": {
+                  "address": registrationRequest.address,
+                  "requestTimeStamp": registrationRequest.requestTimeStamp,
+                  "message": registrationRequest.message,
+                  "validationWindow" :     registrationRequest.validationWindow - (new Date().getTime().toString().slice(0,-3) - registrationRequest.requestTimeStamp)  ,
+                  "messageSignature": registrationRequest.messageSignature
+                }
+              }
+              return data;
+     }
+
+     removeRegistrationRequestByAddress(address){
+     
+
+        this.activeAddresses[address] = null;
+ 
+     }
      removeAddress(registrationRequest){
+      console.log("removeAddress", registrationRequest)
+      console.log("removeAddress2", this.activeAddresses[registrationRequest.address])
+    
+
         this.activeAddresses[registrationRequest.address] = null;
+        console.log("removeAddress3", this.activeAddresses[registrationRequest.address])
+
      }
 
      validationAddress(address){
